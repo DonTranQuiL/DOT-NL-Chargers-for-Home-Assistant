@@ -90,9 +90,7 @@ async def test_update_failed_keeps_last_good(mock_config_entry):
     hass.async_add_executor_job = AsyncMock()
 
     with (
-        patch(
-            "custom_components.dotnl_chargers.coordinator.async_get_clientsession"
-        ),
+        patch("custom_components.dotnl_chargers.coordinator.async_get_clientsession"),
         patch(
             "custom_components.dotnl_chargers.coordinator.DataUpdateCoordinator.__init__",
             return_value=None,

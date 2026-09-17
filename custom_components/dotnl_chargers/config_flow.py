@@ -86,9 +86,7 @@ class DotNLChargersConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         schema = vol.Schema(
             {
                 vol.Optional(CONF_INSTANCE_NAME, default=NAME): str,
-                vol.Optional(
-                    CONF_LATITUDE, default=hass_lat
-                ): selector.NumberSelector(
+                vol.Optional(CONF_LATITUDE, default=hass_lat): selector.NumberSelector(
                     selector.NumberSelectorConfig(
                         min=-90,
                         max=90,
@@ -96,9 +94,7 @@ class DotNLChargersConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         mode=selector.NumberSelectorMode.BOX,
                     )
                 ),
-                vol.Optional(
-                    CONF_LONGITUDE, default=hass_lon
-                ): selector.NumberSelector(
+                vol.Optional(CONF_LONGITUDE, default=hass_lon): selector.NumberSelector(
                     selector.NumberSelectorConfig(
                         min=-180,
                         max=180,
@@ -119,9 +115,7 @@ class DotNLChargersConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 ),
             }
         )
-        return self.async_show_form(
-            step_id="user", data_schema=schema, errors=errors
-        )
+        return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
     @staticmethod
     @callback

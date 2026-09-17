@@ -219,9 +219,7 @@ class DotNLChargersCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         min_available = int(
             _option(self.entry, CONF_MIN_AVAILABLE, DEFAULT_MIN_AVAILABLE)
         )
-        power_min = float(
-            _option(self.entry, CONF_POWER_MIN_KW, DEFAULT_POWER_MIN_KW)
-        )
+        power_min = float(_option(self.entry, CONF_POWER_MIN_KW, DEFAULT_POWER_MIN_KW))
         show_only_open = bool(
             _option(self.entry, CONF_SHOW_ONLY_OPEN, DEFAULT_SHOW_ONLY_OPEN)
         )
@@ -322,7 +320,10 @@ class DotNLChargersCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                     continue
                 item = self._feature_to_item(feature, lat, lon)
                 # Distance filter (bbox is rectangle; keep true circle)
-                if item is not None and float(item.get("distance_km") or 0) <= radius + 0.05:
+                if (
+                    item is not None
+                    and float(item.get("distance_km") or 0) <= radius + 0.05
+                ):
                     items_raw.append(item)
 
             items = self._apply_filters(items_raw)

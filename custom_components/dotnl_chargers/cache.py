@@ -22,9 +22,7 @@ class TariffCache:
 
     def __init__(self, hass: HomeAssistant) -> None:
         self._hass = hass
-        self._store: Store[dict[str, Any]] = Store(
-            hass, STORAGE_VERSION, STORAGE_KEY
-        )
+        self._store: Store[dict[str, Any]] = Store(hass, STORAGE_VERSION, STORAGE_KEY)
         self._prices: dict[str, float] = {}
         self._fetched_at: float = 0.0
         self._loaded = False
@@ -50,9 +48,7 @@ class TariffCache:
         prices = data.get("prices") or {}
         if isinstance(prices, dict):
             self._prices = {
-                str(k): float(v)
-                for k, v in prices.items()
-                if v is not None
+                str(k): float(v) for k, v in prices.items() if v is not None
             }
         self._fetched_at = float(data.get("fetched_at") or 0.0)
         _LOGGER.debug(

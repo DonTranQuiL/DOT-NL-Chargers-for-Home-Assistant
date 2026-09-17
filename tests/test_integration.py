@@ -67,9 +67,7 @@ def test_item_whitelist_keys():
     entry.options = {}
 
     with (
-        patch(
-            "custom_components.dotnl_chargers.coordinator.async_get_clientsession"
-        ),
+        patch("custom_components.dotnl_chargers.coordinator.async_get_clientsession"),
         patch(
             "custom_components.dotnl_chargers.coordinator.DataUpdateCoordinator.__init__",
             return_value=None,
