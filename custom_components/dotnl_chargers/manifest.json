@@ -5,12 +5,12 @@
     "@DonTranQuiL"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant",
-  "issue_tracker": "https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/issues",
-  "iot_class": "cloud_polling",
-  "requirements": [],
-  "version": "0.1.0",
   "dependencies": [
     "http"
-  ]
+  ],
+  "documentation": "https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/issues",
+  "requirements": [],
+  "version": "0.1.0"
 }
