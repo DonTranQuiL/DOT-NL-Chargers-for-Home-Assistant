@@ -5,7 +5,7 @@ from custom_components.dotnl_chargers.const import DOMAIN, PLATFORMS, VERSION
 
 def test_domain_and_version():
     assert DOMAIN == "dotnl_chargers"
-    assert VERSION.count('.') == 2
+    assert VERSION.count(".") == 2
     assert len(PLATFORMS) == 3
 
 
