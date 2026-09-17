@@ -1,0 +1,83 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "DOT-NL Chargers",
+        "description": "Volg nabijgelegen laadpunten via gratis DOT-NL / NDW AFIR open data (Nederland).",
+        "data": {
+          "instance_name": "Instantienaam",
+          "latitude": "Breedtegraad",
+          "longitude": "Lengtegraad",
+          "radius_km": "Zoekradius (km)"
+        },
+        "data_description": {
+          "instance_name": "Optioneel label voor deze instantie (standaard DOT-NL Chargers).",
+          "latitude": "Middelpunt breedtegraad (standaard Home Assistant-locatie).",
+          "longitude": "Middelpunt lengtegraad (standaard Home Assistant-locatie).",
+          "radius_km": "Zoekradius in kilometers. Bbox-oppervlak is begrensd op 1,0 deg² door de API."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Een identieke locatie/radius-instantie is al geconfigureerd."
+    },
+    "error": {}
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "DOT-NL Chargers opties",
+        "description": "Pas polling, filters, kaartmarkers en tariefverrijking aan.",
+        "data": {
+          "scan_interval": "Scaninterval (seconden, min 60)",
+          "radius_km": "Zoekradius (km)",
+          "min_available": "Minimum vrije connectoren",
+          "power_min_kw": "Minimum max vermogen (kW)",
+          "enable_map_trackers": "Kaart device trackers inschakelen",
+          "enable_tariff_enrichment": "OCPI-tariefverrijking inschakelen",
+          "max_map_markers": "Maximum kaartmarkers",
+          "show_only_open": "Alleen open locaties tonen"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overview": {
+        "name": "Overzicht"
+      },
+      "available_stations": {
+        "name": "Beschikbare stations"
+      },
+      "occupied_stations": {
+        "name": "Bezette stations"
+      },
+      "free_connectors": {
+        "name": "Vrije connectoren"
+      },
+      "total_connectors": {
+        "name": "Totaal connectoren"
+      },
+      "closest_available": {
+        "name": "Dichtstbijzijnde beschikbaar"
+      },
+      "cheapest_eur_kwh": {
+        "name": "Goedkoopste energieprijs"
+      },
+      "consecutive_errors": {
+        "name": "Opeenvolgende fouten"
+      },
+      "last_update_status": {
+        "name": "Laatste updatestatus"
+      },
+      "last_update_time": {
+        "name": "Laatste updatetijd"
+      }
+    },
+    "button": {
+      "refresh": {
+        "name": "Vernieuwen"
+      }
+    }
+  }
+}

@@ -1,0 +1,2 @@
+# Runtime requirements are declared in custom_components/dotnl_chargers/manifest.json
+# (stdlib + Home Assistant only — no extra pip deps).

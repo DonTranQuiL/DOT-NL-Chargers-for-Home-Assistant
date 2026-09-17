@@ -1,0 +1,182 @@
+"""Device tracker platform — map markers for nearby DOT-NL chargers."""
+
+from __future__ import annotations
+
+import logging
+import time
+from typing import Any
+
+from homeassistant.components.device_tracker import TrackerEntity
+from homeassistant.components.device_tracker.const import SourceType
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
+
+from .const import (
+    ATTRIBUTION,
+    CONF_ENABLE_MAP_TRACKERS,
+    CONF_INSTANCE_NAME,
+    DEFAULT_ENABLE_MAP_TRACKERS,
+    DOMAIN,
+    MANUFACTURER,
+    NAME,
+    TRACKER_STALE_SECONDS,
+)
+from .coordinator import DotNLChargersCoordinator
+
+_LOGGER = logging.getLogger(__name__)
+
+
+async def async_setup_entry(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    coordinator: DotNLChargersCoordinator = hass.data[DOMAIN][entry.entry_id]
+    active: dict[str, DotNLChargerTracker] = {}
+    last_seen: dict[str, float] = {}
+
+    @callback
+    def _update() -> None:
+        enable = entry.options.get(
+            CONF_ENABLE_MAP_TRACKERS,
+            entry.data.get(CONF_ENABLE_MAP_TRACKERS, DEFAULT_ENABLE_MAP_TRACKERS),
+        )
+        if not enable:
+            # Tear down all trackers when disabled
+            _force_remove(list(active.keys()))
+            return
+
+        data = coordinator.data or {}
+        tracked = data.get("tracked") or []
+        now = time.time()
+        current_ids: set[str] = set()
+        new_entities: list[DotNLChargerTracker] = []
+
+        for item in tracked:
+            cid = item.get("id")
+            if not cid:
+                continue
+            current_ids.add(cid)
+            last_seen[cid] = now
+            if cid not in active:
+                tracker = DotNLChargerTracker(coordinator, entry, cid)
+                active[cid] = tracker
+                new_entities.append(tracker)
+
+        if new_entities:
+            async_add_entities(new_entities)
+
+        # Stale / exited: force-remove after ~45 min without a sighting
+        stale_ids = []
+        for cid in list(active.keys()):
+            seen = last_seen.get(cid, 0)
+            if cid not in current_ids and (now - seen) >= TRACKER_STALE_SECONDS:
+                stale_ids.append(cid)
+            elif cid not in current_ids and seen == 0:
+                last_seen[cid] = now  # grace period starts
+
+        # Also remove immediately if exited and never refreshed again beyond
+        # one full stale window from first miss — handled above.
+        if stale_ids:
+            _force_remove(stale_ids)
+
+    def _force_remove(ids: list[str]) -> None:
+        registry = er.async_get(hass)
+        for cid in ids:
+            entity = active.pop(cid, None)
+            last_seen.pop(cid, None)
+            if entity is None:
+                continue
+            entity_id = entity.entity_id
+            hass.async_create_task(entity.async_remove(force_remove=True))
+            if entity_id and registry.async_get(entity_id):
+                registry.async_remove(entity_id)
+            _LOGGER.debug("Removed stale tracker %s", cid)
+
+    coordinator.async_add_listener(_update)
+    _update()
+
+
+class DotNLChargerTracker(CoordinatorEntity[DotNLChargersCoordinator], TrackerEntity):
+    """GPS tracker for a single charge point (map pin)."""
+
+    _attr_has_entity_name = True
+    _attr_attribution = ATTRIBUTION
+    _attr_icon = "mdi:ev-station"
+
+    def __init__(
+        self,
+        coordinator: DotNLChargersCoordinator,
+        entry: ConfigEntry,
+        charger_id: str,
+    ) -> None:
+        super().__init__(coordinator)
+        self._entry = entry
+        self._charger_id = charger_id
+        instance = entry.data.get(CONF_INSTANCE_NAME, NAME)
+        self._attr_unique_id = f"{DOMAIN}_tracker_{charger_id}_{entry.entry_id}"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name=f"{NAME} ({instance})",
+            manufacturer=MANUFACTURER,
+            model="DOT-NL / NDW AFIR Open Data",
+        )
+
+    def _item(self) -> dict[str, Any] | None:
+        data = self.coordinator.data or {}
+        for collection in ("tracked", "items"):
+            for item in data.get(collection) or []:
+                if item.get("id") == self._charger_id:
+                    return item
+        return None
+
+    @property
+    def name(self) -> str:
+        item = self._item()
+        if item:
+            return item.get("name") or self._charger_id
+        return f"Charger {self._charger_id[-8:]}"
+
+    @property
+    def latitude(self) -> float | None:
+        item = self._item()
+        return item.get("latitude") if item else None
+
+    @property
+    def longitude(self) -> float | None:
+        item = self._item()
+        return item.get("longitude") if item else None
+
+    @property
+    def source_type(self) -> SourceType:
+        return SourceType.GPS
+
+    @property
+    def location_name(self) -> str | None:
+        item = self._item()
+        if not item:
+            return "not_home"
+        status = item.get("status", "unknown")
+        return status
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        item = self._item()
+        if not item:
+            return {"charger_id": self._charger_id}
+        return {
+            "charger_id": self._charger_id,
+            "address": item.get("address"),
+            "operator": item.get("operator"),
+            "status": item.get("status"),
+            "available": item.get("available"),
+            "total": item.get("total"),
+            "max_power_kw": item.get("max_power_kw"),
+            "energy_price_eur_kwh": item.get("energy_price_eur_kwh"),
+            "distance_km": item.get("distance_km"),
+            "open": item.get("open"),
+        }

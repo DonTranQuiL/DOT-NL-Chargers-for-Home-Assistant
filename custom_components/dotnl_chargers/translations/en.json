@@ -1,0 +1,83 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "DOT-NL Chargers",
+        "description": "Track nearby EV charge points using free DOT-NL / NDW AFIR open data (Netherlands).",
+        "data": {
+          "instance_name": "Instance name",
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "radius_km": "Search radius (km)"
+        },
+        "data_description": {
+          "instance_name": "Optional label for this instance (defaults to DOT-NL Chargers).",
+          "latitude": "Centre latitude (defaults to Home Assistant location).",
+          "longitude": "Centre longitude (defaults to Home Assistant location).",
+          "radius_km": "Search radius in kilometres. Bbox area is capped at 1.0 deg² by the API."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "An identical location/radius instance is already configured."
+    },
+    "error": {}
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "DOT-NL Chargers options",
+        "description": "Tune polling, filters, map trackers and tariff enrichment.",
+        "data": {
+          "scan_interval": "Scan interval (seconds, min 60)",
+          "radius_km": "Search radius (km)",
+          "min_available": "Minimum free connectors",
+          "power_min_kw": "Minimum max power (kW)",
+          "enable_map_trackers": "Enable map device trackers",
+          "enable_tariff_enrichment": "Enable OCPI tariff enrichment",
+          "max_map_markers": "Maximum map markers",
+          "show_only_open": "Show only open locations"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "overview": {
+        "name": "Overview"
+      },
+      "available_stations": {
+        "name": "Available stations"
+      },
+      "occupied_stations": {
+        "name": "Occupied stations"
+      },
+      "free_connectors": {
+        "name": "Free connectors"
+      },
+      "total_connectors": {
+        "name": "Total connectors"
+      },
+      "closest_available": {
+        "name": "Closest available"
+      },
+      "cheapest_eur_kwh": {
+        "name": "Cheapest energy price"
+      },
+      "consecutive_errors": {
+        "name": "Consecutive errors"
+      },
+      "last_update_status": {
+        "name": "Last update status"
+      },
+      "last_update_time": {
+        "name": "Last update time"
+      }
+    },
+    "button": {
+      "refresh": {
+        "name": "Refresh"
+      }
+    }
+  }
+}
