@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from custom_components.dotnl_chargers.api import DotNLChargersApi
-from custom_components.dotnl_chargers.const import DOMAIN, ITEM_FIELDS
+from custom_components.dotnl_chargers.const import DOMAIN, ITEM_FIELDS, VERSION
 from tests.conftest import SAMPLE_FEATURE
 
 
@@ -29,7 +29,7 @@ async def test_api_fetch_features_mocked():
     assert features[0]["id"] == SAMPLE_FEATURE["id"]
     # Ensure User-Agent set
     _args, kwargs = session.get.call_args
-    assert "HomeAssistant-DotNL-Chargers/0.1.0" in kwargs["headers"]["User-Agent"]
+    assert f"HomeAssistant-DotNL-Chargers/{VERSION}" in kwargs["headers"]["User-Agent"]
 
 
 @pytest.mark.asyncio

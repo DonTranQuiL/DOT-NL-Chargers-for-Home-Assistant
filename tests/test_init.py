@@ -5,7 +5,7 @@ from custom_components.dotnl_chargers.const import DOMAIN, PLATFORMS, VERSION
 
 def test_domain_and_version():
     assert DOMAIN == "dotnl_chargers"
-    assert VERSION == "0.1.0"
+    assert VERSION.count('.') == 2
     assert len(PLATFORMS) == 3
 
 
@@ -30,4 +30,4 @@ def test_manifest_urls():
         == "https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/issues"
     )
     assert manifest["config_flow"] is True
-    assert manifest["version"] == "0.1.0"
+    assert manifest["version"] == VERSION
