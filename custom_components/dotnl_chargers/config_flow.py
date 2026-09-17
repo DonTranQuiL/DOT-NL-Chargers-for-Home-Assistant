@@ -9,6 +9,7 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_LATITUDE, CONF_LONGITUDE
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import selector
 
 from .const import (
@@ -83,35 +84,16 @@ class DotNLChargersConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 options=options,
             )
 
+        # cv.latitude / cv.longitude, not a number selector.
+        # HA rejects number-selector step < 0.001 (since 2025.9), and a
+        # rejected selector aborts the flow before the form is shown.
         schema = vol.Schema(
             {
                 vol.Optional(CONF_INSTANCE_NAME, default=NAME): str,
-                vol.Optional(CONF_LATITUDE, default=hass_lat): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=-90,
-                        max=90,
-                        step=0.0001,
-                        mode=selector.NumberSelectorMode.BOX,
-                    )
-                ),
-                vol.Optional(CONF_LONGITUDE, default=hass_lon): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=-180,
-                        max=180,
-                        step=0.0001,
-                        mode=selector.NumberSelectorMode.BOX,
-                    )
-                ),
-                vol.Optional(
-                    CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM
-                ): selector.NumberSelector(
-                    selector.NumberSelectorConfig(
-                        min=0.1,
-                        max=50,
-                        step=0.1,
-                        mode=selector.NumberSelectorMode.BOX,
-                        unit_of_measurement="km",
-                    )
+                vol.Optional(CONF_LATITUDE, default=hass_lat): cv.latitude,
+                vol.Optional(CONF_LONGITUDE, default=hass_lon): cv.longitude,
+                vol.Optional(CONF_RADIUS_KM, default=DEFAULT_RADIUS_KM): vol.All(
+                    vol.Coerce(float), vol.Range(min=0.1, max=50.0)
                 ),
             }
         )

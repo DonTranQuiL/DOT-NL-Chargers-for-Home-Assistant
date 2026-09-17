@@ -5,14 +5,12 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 from .const import DOMAIN, PLATFORMS
-from .coordinator import DotNLChargersCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,6 +27,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up DOT-NL Chargers from a config entry."""
     # www/ is shipped with the integration (.gitkeep); register without a
     # blocking filesystem probe on the event loop.
+    from homeassistant.components.http import StaticPathConfig
+
+    from .coordinator import DotNLChargersCoordinator
+
     local_media = str(Path(__file__).parent / "www")
     await hass.http.async_register_static_paths(
         [
