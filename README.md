@@ -52,10 +52,22 @@ Then add a Lovelace resource:
 
 Card config example:
 
+<img width="768" height="813" alt="CARD" src="https://github.com/user-attachments/assets/09e7d148-cf22-41b3-9884-b4b476e906e7" />
+
+
+
 ```yaml
-type: custom:dotnl_chargers-card
-entity: sensor.dot_nl_chargers_overview
-title: Chargers near home
+type: grid
+cards:
+  - type: heading
+    heading: New section
+  - type: custom:dotnl_chargers-card
+    entity: sensor.dot_nl_chargers_THENAMEUGAVE_overview
+    title: Chargers near home
+    layout_options:
+      grid_columns: full
+column_span: 2
+
 ```
 
 ## Recorder tip
