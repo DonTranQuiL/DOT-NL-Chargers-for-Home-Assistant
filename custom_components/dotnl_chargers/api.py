@@ -97,16 +97,31 @@ def classify_status(available: int, total: int) -> str:
 
 
 def extract_energy_price(tariff: dict[str, Any]) -> float | None:
-    """Pull the first ENERGY price_component (EUR/kWh) from an OCPI tariff."""
+    """Lowest positive ENERGY price (EUR/kWh) on an OCPI tariff.
+
+    Operators often publish a 0.0 ENERGY component as a placeholder next to
+    the real rate. That zero must not win, or the cheapest sensor stays at
+    0.0. A tariff that only has zeros is genuinely free and returns 0.0.
+    """
+    prices: list[float] = []
     for element in tariff.get("elements") or []:
+        if not isinstance(element, dict):
+            continue
         for component in element.get("price_components") or []:
-            if component.get("type") == "ENERGY":
-                price = component.get("price")
-                if price is not None:
-                    try:
-                        return float(price)
-                    except (TypeError, ValueError):
-                        continue
+            if not isinstance(component, dict) or component.get("type") != "ENERGY":
+                continue
+            price = component.get("price")
+            if price is None:
+                continue
+            try:
+                prices.append(float(price))
+            except (TypeError, ValueError):
+                continue
+    positive = [price for price in prices if price > 0]
+    if positive:
+        return min(positive)
+    if prices:
+        return 0.0
     return None
 
 

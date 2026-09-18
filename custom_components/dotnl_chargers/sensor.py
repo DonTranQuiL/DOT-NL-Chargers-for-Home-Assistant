@@ -202,6 +202,7 @@ class DotNLCheapestSensor(DotNLBaseSensor):
         self._attr_name = "Cheapest energy price"
         self._attr_icon = "mdi:currency-eur"
         self._attr_native_unit_of_measurement = "EUR/kWh"
+        self._attr_suggested_display_precision = 2
         self._attr_state_class = SensorStateClass.MEASUREMENT
 
     @property

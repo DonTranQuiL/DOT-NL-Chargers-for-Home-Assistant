@@ -258,6 +258,7 @@ class DotNLChargersCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             i
             for i in items_sorted
             if i.get("energy_price_eur_kwh") is not None
+            and float(i["energy_price_eur_kwh"]) > 0
             and int(i.get("available") or 0) > 0
         ]
         cheapest = (

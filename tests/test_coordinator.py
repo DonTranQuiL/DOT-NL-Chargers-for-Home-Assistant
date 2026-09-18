@@ -74,6 +74,25 @@ def test_extract_energy_price_missing():
     assert extract_energy_price({}) is None
 
 
+def test_extract_energy_price_skips_placeholder_zero():
+    tariff = {
+        "elements": [
+            {"price_components": [{"type": "ENERGY", "price": 0.0}]},
+            {"price_components": [{"type": "ENERGY", "price": 0.45}]},
+        ]
+    }
+    assert extract_energy_price(tariff) == 0.45
+
+
+def test_extract_energy_price_free_tariff():
+    tariff = {
+        "elements": [
+            {"price_components": [{"type": "ENERGY", "price": 0.0}]},
+        ]
+    }
+    assert extract_energy_price(tariff) == 0.0
+
+
 @pytest.mark.asyncio
 async def test_update_failed_keeps_last_good(mock_config_entry):
     """When API fails after a success, last_good_data is returned."""

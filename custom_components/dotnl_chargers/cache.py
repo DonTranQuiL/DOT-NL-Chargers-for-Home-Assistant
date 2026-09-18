@@ -14,7 +14,7 @@ from .const import DOMAIN, TARIFF_REFRESH_SECONDS, VERSION
 _LOGGER = logging.getLogger(__name__)
 
 STORAGE_KEY = f"{DOMAIN}.tariffs"
-STORAGE_VERSION = 1
+STORAGE_VERSION = 2
 
 
 class TariffCache:

@@ -171,6 +171,19 @@ class DotNLChargerTracker(CoordinatorEntity[DotNLChargersCoordinator], TrackerEn
         return SourceType.GPS
 
     @property
+    def entity_picture(self) -> str:
+        """Map pin image. Without this, Home Assistant draws name initials.
+
+        Every tracker name starts with the device name, so the initials are
+        always DC. A status-colored picture replaces that badge.
+        """
+        item = self._item()
+        status = (item or {}).get("status") or "unknown"
+        if status not in ("available", "partial", "occupied", "unknown"):
+            status = "unknown"
+        return f"/{DOMAIN}_assets/marker-{status}.png"
+
+    @property
     def location_name(self) -> str | None:
         item = self._item()
         if not item:
