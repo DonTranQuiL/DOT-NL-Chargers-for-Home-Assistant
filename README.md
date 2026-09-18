@@ -9,6 +9,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub release](https://img.shields.io/github/v/release/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant)](https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/releases)
 [![Issues](https://img.shields.io/github/issues/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant)](https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/issues)
+[![Home Assistant CI](https://img.shields.io/github/actions/workflow/status/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/hass-ci.yml?label=Home%20Assistant%20CI&style=for-the-badge)](https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/actions/workflows/hass-ci.yml)
+[![Code Checks](https://img.shields.io/github/actions/workflow/status/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/codechecker.yml?style=for-the-badge&label=CODE%20CHECKS&color=5dbb0f)](https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/actions)
+[![Tests](https://img.shields.io/github/actions/workflow/status/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/pytest.yml?style=for-the-badge&label=TESTS&color=5dbb0f)](https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/actions)
+[![HACS Validation](https://img.shields.io/github/actions/workflow/status/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/hacs.yaml?style=for-the-badge&label=HACS%20VALIDATION&color=5dbb0f)](https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/actions)
+[![Ruff](https://img.shields.io/badge/code%20style-ruff-000000?style=for-the-badge)](https://github.com/astral-sh/ruff)
+[![Maintainer](https://img.shields.io/badge/maintainer-%40DonTranQuiL-007ec6?style=for-the-badge)](https://github.com/DonTranQuiL)
+[![Donate](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-ffdd00?style=for-the-badge)](https://ko-fi.com/DonTranQuiL)
 
 </div>
 
@@ -99,6 +106,10 @@ recorder:
 DOT-NL / AFIR charge-point data is **free open data** published by **NDW** (Nationaal Dataportaal Wegverkeer). This integration is unofficial, not affiliated with NDW or any CPO. Availability and tariffs may be delayed or incomplete — always verify on-site before relying on a connector.
 
 **Credit:** NDW open data — [dotnl.ndw.nu](https://dotnl.ndw.nu) / [opendata.ndw.nu](https://opendata.ndw.nu).
+
+## Built by AI
+
+This integration was created entirely by AI and is maintained by AI.
 
 ## License
 
