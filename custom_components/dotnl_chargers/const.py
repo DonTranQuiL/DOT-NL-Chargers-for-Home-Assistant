@@ -56,7 +56,6 @@ DEFAULT_SHOW_ONLY_OPEN = False
 
 # History / tracker
 HISTORY_MAX = 50
-TRACKER_STALE_SECONDS = 45 * 60  # ~45 minutes
 TARIFF_REFRESH_SECONDS = 6 * 3600  # 6 hours (max cadence 6–12h)
 
 # Bus events

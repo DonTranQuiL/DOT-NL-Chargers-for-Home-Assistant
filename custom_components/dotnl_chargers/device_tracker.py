@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import time
 from typing import Any
 
 from homeassistant.components.device_tracker import TrackerEntity
@@ -23,7 +22,6 @@ from .const import (
     DOMAIN,
     MANUFACTURER,
     NAME,
-    TRACKER_STALE_SECONDS,
 )
 from .coordinator import DotNLChargersCoordinator
 
@@ -37,7 +35,30 @@ async def async_setup_entry(
 ) -> None:
     coordinator: DotNLChargersCoordinator = hass.data[DOMAIN][entry.entry_id]
     active: dict[str, DotNLChargerTracker] = {}
-    last_seen: dict[str, float] = {}
+
+    def _charger_id_from_unique_id(unique_id: str) -> str | None:
+        prefix = f"{DOMAIN}_tracker_"
+        suffix = f"_{entry.entry_id}"
+        if not unique_id.startswith(prefix) or not unique_id.endswith(suffix):
+            return None
+        charger_id = unique_id[len(prefix) : -len(suffix)]
+        return charger_id or None
+
+    def _purge_registry(keep: set[str]) -> None:
+        """Delete tracker registry rows that are no longer in the cap.
+
+        Options reload drops entities the platform does not re-add. Those
+        rows otherwise stay in the registry and show up as unavailable.
+        """
+        registry = er.async_get(hass)
+        for reg in list(er.async_entries_for_config_entry(registry, entry.entry_id)):
+            if reg.domain != "device_tracker":
+                continue
+            charger_id = _charger_id_from_unique_id(reg.unique_id)
+            if charger_id is None or charger_id in keep:
+                continue
+            registry.async_remove(reg.entity_id)
+            _LOGGER.debug("Removed dropped tracker %s", charger_id)
 
     @callback
     def _update() -> None:
@@ -46,13 +67,12 @@ async def async_setup_entry(
             entry.data.get(CONF_ENABLE_MAP_TRACKERS, DEFAULT_ENABLE_MAP_TRACKERS),
         )
         if not enable:
-            # Tear down all trackers when disabled
             _force_remove(list(active.keys()))
+            _purge_registry(set())
             return
 
         data = coordinator.data or {}
         tracked = data.get("tracked") or []
-        now = time.time()
         current_ids: set[str] = set()
         new_entities: list[DotNLChargerTracker] = []
 
@@ -61,7 +81,6 @@ async def async_setup_entry(
             if not cid:
                 continue
             current_ids.add(cid)
-            last_seen[cid] = now
             if cid not in active:
                 tracker = DotNLChargerTracker(coordinator, entry, cid)
                 active[cid] = tracker
@@ -70,32 +89,24 @@ async def async_setup_entry(
         if new_entities:
             async_add_entities(new_entities)
 
-        # Stale / exited: force-remove after ~45 min without a sighting
-        stale_ids = []
-        for cid in list(active.keys()):
-            seen = last_seen.get(cid, 0)
-            if cid not in current_ids and (now - seen) >= TRACKER_STALE_SECONDS:
-                stale_ids.append(cid)
-            elif cid not in current_ids and seen == 0:
-                last_seen[cid] = now  # grace period starts
-
-        # Also remove immediately if exited and never refreshed again beyond
-        # one full stale window from first miss — handled above.
-        if stale_ids:
-            _force_remove(stale_ids)
+        # Cap went down, or a station left the feed: drop it now.
+        # Waiting leaves the old pins as unavailable after an options reload.
+        dropped = [cid for cid in list(active) if cid not in current_ids]
+        if dropped:
+            _force_remove(dropped)
+        _purge_registry(current_ids)
 
     def _force_remove(ids: list[str]) -> None:
         registry = er.async_get(hass)
         for cid in ids:
             entity = active.pop(cid, None)
-            last_seen.pop(cid, None)
             if entity is None:
                 continue
             entity_id = entity.entity_id
             hass.async_create_task(entity.async_remove(force_remove=True))
             if entity_id and registry.async_get(entity_id):
                 registry.async_remove(entity_id)
-            _LOGGER.debug("Removed stale tracker %s", cid)
+            _LOGGER.debug("Removed tracker %s", cid)
 
     coordinator.async_add_listener(_update)
     _update()
