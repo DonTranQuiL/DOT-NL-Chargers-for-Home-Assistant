@@ -1,25 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DOT-NL Chargers for Home Assistant</title>
-  <style>
-    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
-    body { max-width: 720px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
-    code { background: rgba(127,127,127,.15); padding: .1rem .35rem; border-radius: 4px; }
-    a { color: #0b6bcb; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOT-NL Chargers | Home Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
 </head>
-<body>
-  <h1>DOT-NL Chargers</h1>
-  <p>Home Assistant custom integration for Dutch EV charge-point availability using
-    <strong>DOT-NL / NDW AFIR</strong> open data.</p>
-  <ul>
-    <li><a href="https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant">GitHub repository</a></li>
-    <li><a href="https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/issues">Issue tracker</a></li>
-    <li>API: <code>dotnl.ndw.nu</code> GeoJSON + OCPI tariffs gzip</li>
-  </ul>
-  <p>MIT licensed. Data © NDW.</p>
+<body class="bg-[#0B1120] text-slate-200 font-sans selection:bg-emerald-500/30 overflow-x-hidden">
+
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-[#0B1120]/80 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="https://dontranquil.github.io/" class="flex items-center gap-2 text-white font-bold text-xl tracking-wide">
+                <i data-lucide="plug-zap" class="text-emerald-400 w-6 h-6"></i>
+                DOT-NL <span class="text-emerald-400 font-light">Chargers</span>
+            </a>
+            <div class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
+                <a href="#features" class="hover:text-white transition-colors">Features</a>
+                <a href="#map" class="hover:text-white transition-colors">Map</a>
+                <a href="#installation" class="hover:text-white transition-colors">Install</a>
+                <a href="https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant" target="_blank" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-full transition-all">
+                    <i data-lucide="github" class="w-4 h-4"></i> GitHub
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="relative pt-32 pb-20 lg:pt-48 lg:pb-28 overflow-hidden">
+        <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[700px] rounded-full bg-emerald-500/10 blur-3xl pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-900/30 border border-emerald-500/30 text-emerald-300 text-sm font-medium mb-6">
+                Dutch public EV chargers
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6">Charge points, one poll.</h1>
+            <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-10">A Home Assistant integration for occupancy, connectors, and tariffs from NDW DOT-NL. One request per cycle, map pins you can cap, and a cheapest-price sensor that ignores placeholder zeros.</p>
+            <div class="flex flex-wrap items-center justify-center gap-4">
+                <a href="#installation" class="px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">Install with HACS</a>
+                <a href="https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/releases" class="px-6 py-3 rounded-full border border-slate-600 text-slate-200 hover:border-slate-400">Latest release</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="py-20 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-14">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">What it tracks</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto">Live GeoJSON around your home. Sensors only render what the coordinator already fetched.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="rounded-2xl border border-slate-700/60 bg-slate-800/30 p-6">
+                    <i data-lucide="battery-charging" class="text-emerald-400 w-7 h-7 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">Occupancy</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Available stations, occupied stations, free connectors, and totals. Closest available station is its own sensor, in kilometres.</p>
+                </div>
+                <div class="rounded-2xl border border-slate-700/60 bg-slate-800/30 p-6">
+                    <i data-lucide="euro" class="text-emerald-400 w-7 h-7 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">Energy price</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Cheapest EUR/kWh from OCPI energy tariffs, cached for hours. A 0.0 component next to a real rate is ignored unless the station is actually free.</p>
+                </div>
+                <div class="rounded-2xl border border-slate-700/60 bg-slate-800/30 p-6">
+                    <i data-lucide="radar" class="text-emerald-400 w-7 h-7 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-white mb-2">One request</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">The poll is a single GeoJSON call. Tariff enrichment runs in the background. If the feed fails, the last good payload stays on screen.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="map" class="py-20 bg-slate-900/40 border-y border-slate-800">
+        <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Map pins you can cap</h2>
+                <p class="text-slate-400 mb-6">Each station inside Maximum map markers is a pin. Drop the number from 30 to 8 and the extras are deleted, not left unavailable. The ones you keep stay on the map.</p>
+                <ul class="space-y-3 text-sm text-slate-300">
+                    <li class="flex items-center gap-3"><span class="w-3 h-3 rounded-full bg-emerald-400"></span> Green, a free charger</li>
+                    <li class="flex items-center gap-3"><span class="w-3 h-3 rounded-full bg-amber-400"></span> Amber, partly free</li>
+                    <li class="flex items-center gap-3"><span class="w-3 h-3 rounded-full bg-red-500"></span> Red, full</li>
+                    <li class="flex items-center gap-3"><span class="w-3 h-3 rounded-full bg-slate-400"></span> Gray, unknown</li>
+                </ul>
+            </div>
+            <div class="rounded-2xl border border-slate-700 bg-[#0d1326] p-6">
+                <p class="text-xs font-mono text-slate-500 mb-3">Options</p>
+                <dl class="space-y-3 text-sm">
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400">scan_interval</dt><dd class="text-white">120 s, minimum 60</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400">radius_km</dt><dd class="text-white">2.0</dd></div>
+                    <div class="flex justify-between gap-4 border-b border-slate-800 pb-3"><dt class="text-slate-400">max_map_markers</dt><dd class="text-white">40</dd></div>
+                    <div class="flex justify-between gap-4"><dt class="text-slate-400">enable_map_trackers</dt><dd class="text-white">on</dd></div>
+                </dl>
+            </div>
+        </div>
+    </section>
+
+    <section id="installation" class="py-24">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-14">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Installation</h2>
+                <p class="text-slate-400">HACS custom repository, then a restart.</p>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="rounded-2xl border border-slate-700/50 bg-slate-800/30 p-8">
+                    <h3 class="text-2xl font-bold text-white mb-6">HACS</h3>
+                    <ol class="space-y-4 text-sm text-slate-300">
+                        <li>1. HACS, Integrations, then the menu, Custom repositories.</li>
+                        <li>2. URL <code class="text-emerald-300">https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant</code></li>
+                        <li>3. Category Integration, then Add.</li>
+                        <li>4. Download DOT-NL Chargers and restart Home Assistant.</li>
+                        <li>5. Settings, Devices and services, Add integration, DOT-NL Chargers.</li>
+                    </ol>
+                </div>
+                <div class="space-y-6">
+                    <div class="rounded-2xl border border-orange-500/30 bg-orange-900/10 p-8">
+                        <h3 class="text-xl font-bold text-white mb-3">Keep the recorder lean</h3>
+                        <p class="text-sm text-slate-300 mb-4">The overview sensor carries the station list. Exclude it so Home Assistant does not write that blob into the database.</p>
+                        <pre class="text-sm font-mono text-slate-300 bg-[#0d1326] border border-slate-700 rounded-xl p-4 overflow-x-auto"><code>recorder:
+  exclude:
+    entities:
+      - sensor.dot_nl_chargers_overview</code></pre>
+                    </div>
+                    <div class="rounded-2xl border border-slate-700 bg-slate-800/30 p-8">
+                        <h3 class="text-xl font-bold text-white mb-3">Lovelace card</h3>
+                        <p class="text-sm text-slate-300 mb-4">Copy <code class="text-emerald-300">dotnl_chargers-card.js</code> into <code class="text-emerald-300">/config/www/</code> and add it as a JavaScript module at <code class="text-emerald-300">/local/dotnl_chargers-card.js</code>.</p>
+                        <pre class="text-sm font-mono text-slate-300 bg-[#0d1326] border border-slate-700 rounded-xl p-4 overflow-x-auto"><code>type: custom:dotnl_chargers-card
+entity: sensor.dot_nl_chargers_overview
+title: Chargers near home</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-[#050810] border-t border-slate-800 py-12 text-sm text-slate-500">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-8">
+            <div>
+                <div class="flex items-center gap-2 text-slate-300 font-bold text-lg mb-3">
+                    <i data-lucide="plug-zap" class="text-emerald-400 w-5 h-5"></i> DOT-NL Chargers
+                </div>
+                <p class="max-w-md mb-3">Created entirely by AI and maintained by AI, for DonTranQuiL. Unofficial. Not affiliated with NDW or any charge-point operator.</p>
+                <p>Data &copy; NDW / DOT-NL. <a class="text-slate-400 hover:text-white" href="https://dotnl.ndw.nu">dotnl.ndw.nu</a></p>
+            </div>
+            <div class="md:text-right space-y-2">
+                <p><a class="hover:text-white" href="https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant">Repository</a></p>
+                <p><a class="hover:text-white" href="https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant/issues">Issues</a></p>
+                <p><a class="hover:text-white" href="https://ko-fi.com/DonTranQuiL">Ko-fi</a></p>
+                <p><a class="hover:text-white" href="https://dontranquil.github.io/">All integrations</a></p>
+                <p class="pt-2">MIT</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => { if (window.lucide) lucide.createIcons(); });
+    </script>
 </body>
 </html>
