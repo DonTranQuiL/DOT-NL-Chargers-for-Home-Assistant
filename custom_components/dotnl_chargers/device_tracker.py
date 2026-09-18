@@ -107,6 +107,10 @@ class DotNLChargerTracker(CoordinatorEntity[DotNLChargersCoordinator], TrackerEn
     _attr_has_entity_name = True
     _attr_attribution = ATTRIBUTION
     _attr_icon = "mdi:ev-station"
+    # BaseTrackerEntity sets this to DIAGNOSTIC. These pins are the
+    # stations the user wants on the device page, so keep them uncategorized.
+    # device_tracker is grouped under Sensors when category is None.
+    _attr_entity_category = None
 
     def __init__(
         self,
@@ -170,6 +174,8 @@ class DotNLChargerTracker(CoordinatorEntity[DotNLChargersCoordinator], TrackerEn
             return {"charger_id": self._charger_id}
         return {
             "charger_id": self._charger_id,
+            "latitude": item.get("latitude"),
+            "longitude": item.get("longitude"),
             "address": item.get("address"),
             "operator": item.get("operator"),
             "status": item.get("status"),

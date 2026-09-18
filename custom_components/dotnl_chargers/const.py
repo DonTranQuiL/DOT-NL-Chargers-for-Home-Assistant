@@ -7,7 +7,7 @@ from homeassistant.const import Platform
 DOMAIN = "dotnl_chargers"
 NAME = "DOT-NL Chargers"
 MANUFACTURER = "DonTranQuiL"
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 ATTRIBUTION = "Data © NDW / DOT-NL (AFIR open data)"
 
 PLATFORMS: list[Platform] = [
