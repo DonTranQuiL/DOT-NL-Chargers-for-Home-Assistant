@@ -1,0 +1,38 @@
+{
+  "retrieved": "2026-09-20",
+  "source": "https://dotnl.ndw.nu/api/rest/geojson/dynamic-road-status/charge-point-data/v1/features?bbox=5.1,52.08,5.15,52.11",
+  "type": "FeatureCollection",
+  "feature_property_keys": [
+    "address",
+    "availabilities",
+    "country",
+    "cpo_id",
+    "last_updated",
+    "open",
+    "operator_name",
+    "owner_name",
+    "suboperator_name"
+  ],
+  "geometry_type": "Point",
+  "example_properties": {
+    "address": "79 Ondiep",
+    "last_updated": "2026-09-19T22:01:49Z",
+    "open": false,
+    "cpo_id": "GFX",
+    "availabilities": [
+      {
+        "available": 0,
+        "connector_format": "SOCKET",
+        "connector_type": "IEC_62196_T2",
+        "power_max": 17000.0,
+        "power_type": "AC3",
+        "total": 2,
+        "tariff_ids": []
+      }
+    ],
+    "country": "NLD",
+    "operator_name": "TotalEnergies",
+    "owner_name": "TotalEnergies",
+    "suboperator_name": null
+  }
+}

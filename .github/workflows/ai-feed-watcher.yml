@@ -1,8 +1,8 @@
-name: AI Aviation API Watcher
+name: AI DOT-NL Feed Watcher
 
 on:
   schedule:
-    - cron: "0 3 * * *" # Runs daily
+    - cron: "0 3 * * *"
   workflow_dispatch:
 
 jobs:
@@ -11,7 +11,7 @@ jobs:
     permissions:
       issues: write
       contents: write
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
@@ -22,27 +22,32 @@ jobs:
           python-version: "3.12"
 
       - name: Install Dependencies
-        run: pip install requests openai FlightRadarAPI
+        run: pip install requests openai
 
-      - name: Run Aviation Feed Watcher
+      - name: Run DOT-NL Feed Watcher
         id: watcher
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
         run: python ai_engineer/feed_watcher.py
-          
+
       - name: Create Issue
         if: env.SCHEMA_CHANGED == 'true'
         uses: peter-evans/create-issue-from-file@v6
         with:
           title: ${{ env.ISSUE_TITLE }}
-          content-filepath: ./ai_report.md
+          content-filepath: ./feed_watch_report.md
           labels: bug, upstream-change, ai-detected, ${{ env.API_LABELS }}
 
       - name: Save API Memory Snapshots
         run: |
-          git config --global user.name "AI Staff Engineer"
-          git config --global user.email "ai@github.com"
+          mkdir -p .memory
+          if [ -z "$(git status --porcelain .memory)" ]; then
+            echo "Memory is already up to date"
+            exit 0
+          fi
+          git config user.name "AI Staff Engineer"
+          git config user.email "ai@github.com"
           git add .memory/
-          git commit -m "?? Update aviation API baselines" || echo "Memory is already up to date"
+          git commit -m "chore: update DOT-NL API baselines" || echo "Memory is already up to date"
           git push
