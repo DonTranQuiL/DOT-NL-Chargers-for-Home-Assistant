@@ -18,7 +18,7 @@ def _llm_client():
     if or_key:
         return (
             OpenAI(base_url="https://openrouter.ai/api/v1", api_key=or_key),
-            "openai/gpt-4o-mini",
+            "deepseek/deepseek-v4.1-flash",
         )
     print("No XAI_API_KEY or OPENROUTER_API_KEY — exiting cleanly.")
     raise SystemExit(0)
