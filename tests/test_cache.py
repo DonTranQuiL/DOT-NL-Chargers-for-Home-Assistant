@@ -43,9 +43,7 @@ async def test_tariff_cache_load_failure_is_soft(hass):
     """Store load/migration errors must not abort config-entry setup."""
     cache = TariffCache(hass)
     with (
-        patch.object(
-            cache._store, "async_load", side_effect=NotImplementedError
-        ),
+        patch.object(cache._store, "async_load", side_effect=NotImplementedError),
         patch.object(
             cache._store, "async_remove", new_callable=AsyncMock
         ) as mock_remove,
