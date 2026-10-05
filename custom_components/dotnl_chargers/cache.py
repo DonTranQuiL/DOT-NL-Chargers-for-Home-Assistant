@@ -17,12 +17,43 @@ STORAGE_KEY = f"{DOMAIN}.tariffs"
 STORAGE_VERSION = 2
 
 
+class _TariffStore(Store[dict[str, Any]]):
+    """Store with a no-op major-version migrate (payload shape unchanged)."""
+
+    async def _async_migrate_func(
+        self,
+        old_major_version: int,
+        old_minor_version: int,
+        old_data: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Migrate on-disk tariff cache to the current storage version.
+
+        STORAGE_VERSION was bumped 1 → 2 without changing the payload shape
+        ({version, fetched_at, prices}). Return the old data unchanged so HA
+        can rewrite the file at the new version instead of raising
+        NotImplementedError and aborting config-entry setup.
+        """
+        _LOGGER.info(
+            "Migrating %s storage from %s.%s to %s.%s (payload unchanged)",
+            self.key,
+            old_major_version,
+            old_minor_version,
+            self.version,
+            self.minor_version,
+        )
+        if not isinstance(old_data, dict):
+            return {}
+        return old_data
+
+
 class TariffCache:
     """Background Store-backed map of tariff_id → energy_price_eur_kwh."""
 
     def __init__(self, hass: HomeAssistant) -> None:
         self._hass = hass
-        self._store: Store[dict[str, Any]] = Store(hass, STORAGE_VERSION, STORAGE_KEY)
+        self._store: Store[dict[str, Any]] = _TariffStore(
+            hass, STORAGE_VERSION, STORAGE_KEY
+        )
         self._prices: dict[str, float] = {}
         self._fetched_at: float = 0.0
         self._loaded = False
@@ -38,10 +69,35 @@ class TariffCache:
         return (time.time() - self._fetched_at) >= TARIFF_REFRESH_SECONDS
 
     async def async_load(self) -> None:
-        """Load prices from HA Store (once per process)."""
+        """Load prices from HA Store (once per process).
+
+        Never raises: a corrupt or unreadable store must not block setup.
+        """
         if self._loaded:
             return
-        data = await self._store.async_load()
+        try:
+            data = await self._store.async_load()
+        except Exception:  # noqa: BLE001 — cache must never kill setup
+            _LOGGER.warning(
+                "Failed to load tariff cache %s; starting empty "
+                "(delete .storage/%s to force a clean rebuild)",
+                STORAGE_KEY,
+                STORAGE_KEY,
+                exc_info=True,
+            )
+            try:
+                await self._store.async_remove()
+            except Exception:  # noqa: BLE001
+                _LOGGER.debug(
+                    "Could not remove broken tariff store %s",
+                    STORAGE_KEY,
+                    exc_info=True,
+                )
+            self._prices = {}
+            self._fetched_at = 0.0
+            self._loaded = True
+            return
+
         self._loaded = True
         if not data:
             return
@@ -50,7 +106,10 @@ class TariffCache:
             self._prices = {
                 str(k): float(v) for k, v in prices.items() if v is not None
             }
-        self._fetched_at = float(data.get("fetched_at") or 0.0)
+        try:
+            self._fetched_at = float(data.get("fetched_at") or 0.0)
+        except (TypeError, ValueError):
+            self._fetched_at = 0.0
         _LOGGER.debug(
             "Tariff cache loaded: %s prices, age=%.0fs",
             len(self._prices),
