@@ -1,10 +1,6 @@
 {
   "domain": "dotnl_chargers",
   "name": "DOT-NL Chargers",
-  "categories": [
-    "energy.ev_charging",
-    "vehicles_transport.cars_evs"
-  ],
   "codeowners": [
     "@DonTranQuiL"
   ],
