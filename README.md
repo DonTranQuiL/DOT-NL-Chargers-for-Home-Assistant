@@ -33,13 +33,21 @@
 - Defensive polling with `consecutive_errors` + last-good-data fallback
 - Dutch + English UI translations
 
-## Install (HACS custom repository)
+## Install (HACS)
 
-1. HACS → Integrations → ⋮ → **Custom repositories**
-2. URL: `https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant`
-3. Category: **Integration**
-4. Download **DOT-NL Chargers**, then restart Home Assistant
-5. Settings → Devices & services → Add Integration → **DOT-NL Chargers**
+**DOT-NL Chargers** is submitted to the **HACS default list**, so you can install it straight from the HACS store:
+
+1. Open **HACS** in your sidebar and search for **DOT-NL Chargers**.
+2. Open it and click **Download**.
+3. **Restart Home Assistant.**
+4. Settings → Devices & services → Add Integration → **DOT-NL Chargers**
+
+<details>
+<summary>Fallback: add as a custom repository</summary>
+
+If DOT-NL Chargers does not show up in the HACS search (yet), click the three dots (⋮) in the top right of HACS → **Custom repositories**, paste `https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant` with category **Integration**, click **Add**, then continue with step 2.
+
+</details>
 
 ## Lovelace card
 
