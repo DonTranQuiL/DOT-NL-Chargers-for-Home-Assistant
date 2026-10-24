@@ -83,6 +83,10 @@ class DotNLBaseSensor(CoordinatorEntity[DotNLChargersCoordinator], SensorEntity)
 class DotNLOverviewSensor(DotNLBaseSensor):
     """Fat overview sensor — free connectors (or available stations) + attrs."""
 
+    # Station lists can exceed the recorder's 16 KB attribute limit; keep
+    # them available to the card but out of the database.
+    _unrecorded_attributes = frozenset({"items", "history", "entered", "exited"})
+
     def __init__(
         self, coordinator: DotNLChargersCoordinator, entry: ConfigEntry
     ) -> None:

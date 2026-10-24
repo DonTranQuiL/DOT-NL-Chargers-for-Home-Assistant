@@ -108,9 +108,9 @@ def mock_api_features(sample_features):
 @pytest.fixture
 def mock_api_tariffs():
     with patch(
-        "custom_components.dotnl_chargers.api.DotNLChargersApi.fetch_tariffs",
+        "custom_components.dotnl_chargers.api.DotNLChargersApi.fetch_tariffs_raw",
         new_callable=AsyncMock,
-        return_value={"t-sample-energy": 0.40, "t-cheap": 0.21},
+        return_value=b"[]",
     ) as mock:
         yield mock
 

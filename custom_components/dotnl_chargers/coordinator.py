@@ -17,6 +17,7 @@ from .api import (
     DotNLChargersApi,
     classify_status,
     haversine_km,
+    parse_tariffs,
 )
 from .cache import TariffCache
 from .const import (
@@ -128,7 +129,8 @@ class DotNLChargersCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if not self.tariff_cache.is_stale:
             return
         try:
-            prices = await self.api.fetch_tariffs()
+            raw = await self.api.fetch_tariffs_raw()
+            prices = await self.hass.async_add_executor_job(parse_tariffs, raw)
             await self.tariff_cache.async_save(prices)
         except Exception as err:  # noqa: BLE001 — background best-effort
             _LOGGER.warning("Tariff enrichment refresh failed: %s", err)

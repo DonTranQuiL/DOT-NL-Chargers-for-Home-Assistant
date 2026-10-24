@@ -43,16 +43,9 @@
 
 ## Lovelace card
 
-Copy the card into your HA config www folder:
+The card ships with the integration and is loaded automatically, so there is nothing to copy and no resource to add. After installing (or updating) the integration and restarting Home Assistant, do a hard refresh of your browser and add the card to a dashboard.
 
-```bash
-cp dotnl_chargers-card.js /config/www/dotnl_chargers-card.js
-```
-
-Then add a Lovelace resource:
-
-- URL: `/local/dotnl_chargers-card.js`
-- Type: JavaScript Module
+If you copied `dotnl_chargers-card.js` to `/config/www/` and added a `/local/dotnl_chargers-card.js` resource with an earlier version, remove that resource under **Settings → Dashboards → Resources** and delete the old file.
 
 Card config example:
 
@@ -66,7 +59,7 @@ cards:
   - type: heading
     heading: New section
   - type: custom:dotnl_chargers-card
-    entity: sensor.dot_nl_chargers_THENAMEUGAVE_overview
+    entity: sensor.dot_nl_chargers_home_overview
     title: Chargers near home
     layout_options:
       grid_columns: full
@@ -74,18 +67,11 @@ column_span: 2
 
 ```
 
-## Recorder tip
+The entity id is based on the name you gave the entry: an entry named **Home** gives `sensor.dot_nl_chargers_home_overview`. Check **Settings → Devices & services → DOT-NL Chargers** for yours.
 
-The overview sensor carries fat attributes (`items`, `history`, …). Exclude it from the recorder to keep the database lean:
+## Recorder
 
-```yaml
-recorder:
-  exclude:
-    entities:
-      - sensor.dot_nl_chargers_overview
-```
-
-(Adjust the entity id to match your instance.)
+The overview sensor's large attributes (`items`, `history`, `entered`, `exited`) are excluded from the recorder automatically, so no `configuration.yaml` changes are needed.
 
 ## Options
 

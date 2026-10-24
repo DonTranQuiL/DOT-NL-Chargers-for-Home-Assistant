@@ -17,30 +17,39 @@ _LOGGER = logging.getLogger(__name__)
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
+ASSETS_URL = f"/{DOMAIN}_assets"
+CARD_FILE = "dotnl_chargers-card.js"
+CARD_VERSION = "0.2.0"
+DATA_FRONTEND_REGISTERED = f"{DOMAIN}_frontend_registered"
+
+
+async def _async_register_frontend(hass: HomeAssistant) -> None:
+    """Serve the bundled assets and load the dashboard card, only once."""
+    if hass.data.get(DATA_FRONTEND_REGISTERED):
+        return
+    hass.data[DATA_FRONTEND_REGISTERED] = True
+    from homeassistant.components.frontend import add_extra_js_url
+    from homeassistant.components.http import StaticPathConfig
+
+    try:
+        await hass.http.async_register_static_paths(
+            [StaticPathConfig(ASSETS_URL, str(Path(__file__).parent / "www"), True)]
+        )
+        add_extra_js_url(hass, f"{ASSETS_URL}/{CARD_FILE}?v={CARD_VERSION}")
+    except Exception as err:  # noqa: BLE001
+        _LOGGER.warning("Could not register the DOT-NL Chargers card: %s", err)
+
+
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the DOT-NL Chargers component (YAML not used)."""
     hass.data.setdefault(DOMAIN, {})
+    await _async_register_frontend(hass)
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up DOT-NL Chargers from a config entry."""
-    # www/ is shipped with the integration (.gitkeep); register without a
-    # blocking filesystem probe on the event loop.
-    from homeassistant.components.http import StaticPathConfig
-
     from .coordinator import DotNLChargersCoordinator
-
-    local_media = str(Path(__file__).parent / "www")
-    await hass.http.async_register_static_paths(
-        [
-            StaticPathConfig(
-                f"/{DOMAIN}_assets",
-                local_media,
-                cache_headers=True,
-            )
-        ]
-    )
 
     coordinator = DotNLChargersCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()

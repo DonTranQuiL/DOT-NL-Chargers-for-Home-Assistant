@@ -170,11 +170,11 @@ class DotNLChargersApi:
                 raise DotNLApiError("DOT-NL response missing features list")
             return features
 
-    async def fetch_tariffs(self) -> dict[str, float]:
-        """Download OCPI tariffs gzip once; return {tariff_id: energy_eur_kwh}.
+    async def fetch_tariffs_raw(self) -> bytes:
+        """Download the OCPI tariffs file (gzip or plain JSON) as raw bytes.
 
-        Never call this inside the main poll hot-path — cache via Store and
-        refresh every 6–12 h only.
+        Decoding and parsing is CPU heavy (~4 MB gzip); do that with
+        :func:`parse_tariffs` in an executor, never on the event loop.
         """
         _LOGGER.debug("Fetching OCPI tariffs from %s", TARIFFS_URL)
         async with self._session.get(
@@ -187,41 +187,47 @@ class DotNLChargersApi:
                 raise DotNLApiError(
                     f"OCPI tariffs HTTP {response.status}: {text[:200]}"
                 )
-            raw = await response.read()
+            return await response.read()
 
-        try:
-            if raw[:2] == b"\x1f\x8b":
-                data = json.loads(gzip.decompress(raw))
-            else:
-                data = json.loads(raw)
-        except (OSError, json.JSONDecodeError) as err:
-            raise DotNLApiError(f"Failed to decode tariffs: {err}") from err
 
-        tariffs_list: list[dict[str, Any]] = []
-        if isinstance(data, dict):
-            # OCPI Tariff response shapes: {data: [...]} or {tariffs: [...]}
-            for key in ("data", "tariffs", "Tariffs"):
-                if isinstance(data.get(key), list):
-                    tariffs_list = data[key]
-                    break
-            if not tariffs_list and "id" in data:
-                tariffs_list = [data]
-        elif isinstance(data, list):
-            tariffs_list = data
+def parse_tariffs(raw: bytes) -> dict[str, float]:
+    """Decode the OCPI tariffs payload into {tariff_id: energy_eur_kwh}.
 
-        price_map: dict[str, float] = {}
-        for tariff in tariffs_list:
-            if not isinstance(tariff, dict):
-                continue
-            tid = tariff.get("id")
-            if not tid:
-                continue
-            price = extract_energy_price(tariff)
-            if price is not None:
-                price_map[str(tid)] = price
+    Blocking (gzip + JSON + loop over every tariff): run it in an executor.
+    """
+    try:
+        if raw[:2] == b"\x1f\x8b":
+            data = json.loads(gzip.decompress(raw))
+        else:
+            data = json.loads(raw)
+    except (OSError, ValueError) as err:
+        raise DotNLApiError(f"Failed to decode tariffs: {err}") from err
 
-        _LOGGER.info("Loaded %s OCPI ENERGY tariff prices", len(price_map))
-        return price_map
+    tariffs_list: list[dict[str, Any]] = []
+    if isinstance(data, dict):
+        # OCPI Tariff response shapes: {data: [...]} or {tariffs: [...]}
+        for key in ("data", "tariffs", "Tariffs"):
+            if isinstance(data.get(key), list):
+                tariffs_list = data[key]
+                break
+        if not tariffs_list and "id" in data:
+            tariffs_list = [data]
+    elif isinstance(data, list):
+        tariffs_list = data
+
+    price_map: dict[str, float] = {}
+    for tariff in tariffs_list:
+        if not isinstance(tariff, dict):
+            continue
+        tid = tariff.get("id")
+        if not tid:
+            continue
+        price = extract_energy_price(tariff)
+        if price is not None:
+            price_map[str(tid)] = price
+
+    _LOGGER.info("Loaded %s OCPI ENERGY tariff prices", len(price_map))
+    return price_map
 
 
 class DotNLApiError(Exception):

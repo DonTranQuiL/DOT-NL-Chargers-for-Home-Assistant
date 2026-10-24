@@ -1,7 +1,12 @@
 /**
  * DOT-NL Chargers Lovelace card (vanilla JS, not Lit).
  * Custom element tag: dotnl_chargers-card
+ *
+ * Bundled with the integration and loaded automatically from
+ * /dotnl_chargers_assets/dotnl_chargers-card.js.
  */
+const CARD_VERSION = "0.2.0";
+
 class DotnlChargersCard extends HTMLElement {
   constructor() {
     super();
@@ -40,6 +45,7 @@ class DotnlChargersCard extends HTMLElement {
     const fingerprint = JSON.stringify({
       s: stateObj.state,
       items,
+      history,
       counts,
       f: this._filter,
       o: this._sort,
@@ -56,6 +62,13 @@ class DotnlChargersCard extends HTMLElement {
     return 6;
   }
 
+  static getStubConfig(hass) {
+    const entity = Object.keys((hass && hass.states) || {}).find(
+      (id) => id.startsWith("sensor.dot_nl_chargers") && id.endsWith("_overview")
+    );
+    return { entity: entity || "sensor.dot_nl_chargers_home_overview" };
+  }
+
   _isDark(hass) {
     try {
       return !!(hass && hass.themes && hass.themes.darkMode);
@@ -69,7 +82,8 @@ class DotnlChargersCard extends HTMLElement {
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   _statusColor(status) {
@@ -273,7 +287,7 @@ class DotnlChargersCard extends HTMLElement {
           <h3>Recent history</h3>
           <ul>${hist || "<li>No history yet</li>"}</ul>
         </div>
-        <div class="foot">Data © NDW / DOT-NL (AFIR open data) · Card v0.1.0</div>
+        <div class="foot">Data © NDW / DOT-NL (AFIR open data) · Card v${CARD_VERSION}</div>
       </ha-card>
     `;
 
@@ -284,12 +298,12 @@ class DotnlChargersCard extends HTMLElement {
 
 if (!customElements.get("dotnl_chargers-card")) {
   customElements.define("dotnl_chargers-card", DotnlChargersCard);
+  window.customCards = window.customCards || [];
+  window.customCards.push({
+    type: "dotnl_chargers-card",
+    name: "DOT-NL Chargers Card",
+    description: "Overview card for DOT-NL / NDW EV charge points near you.",
+    preview: true,
+    documentationURL: "https://github.com/DonTranQuiL/DOT-NL-Chargers-for-Home-Assistant",
+  });
 }
-
-window.customCards = window.customCards || [];
-window.customCards.push({
-  type: "dotnl_chargers-card",
-  name: "DOT-NL Chargers Card",
-  description: "Overview card for DOT-NL / NDW EV charge points near you.",
-  preview: true,
-});
