@@ -19,7 +19,7 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 ASSETS_URL = f"/{DOMAIN}_assets"
 CARD_FILE = "dotnl_chargers-card.js"
-CARD_VERSION = "0.2.0"
+CARD_VERSION = "0.2.1"
 DATA_FRONTEND_REGISTERED = f"{DOMAIN}_frontend_registered"
 
 

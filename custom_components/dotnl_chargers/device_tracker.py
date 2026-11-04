@@ -108,7 +108,7 @@ async def async_setup_entry(
                 registry.async_remove(entity_id)
             _LOGGER.debug("Removed tracker %s", cid)
 
-    coordinator.async_add_listener(_update)
+    entry.async_on_unload(coordinator.async_add_listener(_update))
     _update()
 
 
