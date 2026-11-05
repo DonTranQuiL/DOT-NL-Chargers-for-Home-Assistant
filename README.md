@@ -33,9 +33,18 @@
 - Defensive polling with `consecutive_errors` + last-good-data fallback
 - Dutch + English UI translations
 
-## Install (HACS)
+## Install
 
-**DOT-NL Chargers** is submitted to the **HACS default list**, so you can install it straight from the HACS store:
+### Marketplace (Home Assistant 2026.11 and newer, recommended)
+
+[![Open your Home Assistant instance and open this repository in the Marketplace.](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=DonTranQuiL&repository=DOT-NL-Chargers-for-Home-Assistant&category=integration)
+
+1. In Home Assistant, go to **Settings > Marketplace** and search for **DOT-NL Chargers** (or use the button above).
+2. Open it and select **Install**. The setup starts right away, no restart needed.
+
+### HACS (Home Assistant before 2026.11)
+
+**DOT-NL Chargers** is in the **HACS default list**, so you can install it straight from the HACS store:
 
 1. Open **HACS** in your sidebar and search for **DOT-NL Chargers**.
 2. Open it and click **Download**.
